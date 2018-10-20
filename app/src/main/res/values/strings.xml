@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">车辆检测系统</string>
+    <string name="copyright">Copyright© 2017-2020 Dixin All Rights Reserverd</string>
+    <string name="btn1_botton_name">检测</string>
+    <string name="btn2_botton_name">查询</string>
+    <string name="hinAccount"><font size="14">登录账号</font></string>
+    <string name="hinPassword"><font size="14">登录密码</font></string>
+    <string-array name="carType">
+        <item>V3</item>
+        <item>V3ET</item>
+        <item>NG80A</item>
+        <item>NG80B</item>
+        <item>NG80X</item>
+    </string-array>
+    <string-array name="engineType">
+        <item>欧Ⅱ</item>
+        <item>欧Ⅲ</item>
+        <item>国Ⅲ</item>
+        <item>国Ⅳ</item>
+        <item>国Ⅴ</item>
+        <item>LNG</item>
+        <item>WP13</item>
+        <item>风冷</item>
+    </string-array>
+
+    <drawable name="normal">#000000</drawable>
+    <drawable name="selected">#0000FF</drawable>
+
+</resources>

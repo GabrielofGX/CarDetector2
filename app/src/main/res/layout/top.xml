@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="35dp"
+    android:background="#1E90FF">
+
+    <TextView
+        android:id="@+id/top_tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="车辆检测"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:layout_centerInParent="true"/>
+
+    <ImageView
+        android:id="@+id/top_iv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp"
+        android:layout_centerVertical="true"
+        android:background="@mipmap/add"/>
+
+    <!--<LinearLayout-->
+        <!--android:id="@+id/top_ll_right"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_weight="1.0"-->
+        <!--android:gravity="right"-->
+        <!--android:visibility="invisible">-->
+        <!--<TextView-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content" />-->
+    <!--</LinearLayout>-->
+
+</RelativeLayout>

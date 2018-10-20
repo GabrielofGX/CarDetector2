@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/ll_list_item">
+
+    <TextView
+        android:id="@+id/tv_detect_list_id"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/defaultTextColor"
+        android:textSize="24sp"
+        android:text="88"
+        android:gravity="left|center_vertical"
+        android:layout_marginTop="2dp"/>
+    <TextView
+        android:id="@+id/tv_detect_list_item"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0"
+        android:layout_marginTop="2dp"
+        android:layout_marginLeft="5dp"
+        android:ellipsize="end"
+        android:text="我是一个好同学,的好老师的朋友的亲戚的的点点滴滴的"
+        android:maxLines="2"
+        android:textSize="24sp"
+        android:textColor="@color/defaultTextColor"
+        android:gravity="left|center_vertical"/>
+    <TextView
+        android:id="@+id/tv_detect_list_result"
+        android:layout_width="wrap_content"
+        android:maxWidth="82dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:text="正在检测"
+        android:textSize="24sp"
+        android:gravity="right|center_vertical"
+        android:clickable="true"/>
+
+</LinearLayout>

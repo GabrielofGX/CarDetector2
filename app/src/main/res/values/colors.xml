@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFF</color>
+    <color name="colorPrimary">#99FFFF</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="black">#000000</color>
+
+    <color name="gray">#DDDDDD</color>
+    <color name="red">#FF0000</color>
+    <color name="defaultTextColor">#333333</color>
+    <color name="hintColor">#606060</color>
+    <color name="editCursorColor">#62AEFE</color>
+    <color name="lineColor">#A9A9A9</color>
+    <color name="alertDialogTextColor">#33B5E5</color>
+
+</resources>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="300dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="选择重新检测?"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="10dp"/>
+    <RadioGroup
+        android:id="@+id/rg_recheck"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <RadioButton
+            android:id="@+id/recheck_yes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="是"
+            android:textSize="16sp"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+        <RadioButton
+            android:id="@+id/recheck_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="否"
+            android:textSize="16sp"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="33dp"/>
+    </RadioGroup>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="或者修改检测结果？"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"/>
+
+    <RadioGroup
+        android:id="@+id/rg_change_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <RadioButton
+            android:id="@+id/change_result_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="合格"
+            android:textSize="16sp"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="10dp"/>
+        <RadioButton
+            android:id="@+id/change_result_err"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="不合格"
+            android:textSize="16sp"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="20dp"/>
+        <RadioButton
+            android:id="@+id/change_result_except"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="排除项"
+            android:textSize="16sp"
+            android:layout_marginTop="2dp"
+            android:layout_marginLeft="20dp"/>
+    </RadioGroup>
+</LinearLayout>
