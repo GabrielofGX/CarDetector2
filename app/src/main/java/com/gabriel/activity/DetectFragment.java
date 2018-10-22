@@ -14,6 +14,7 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -77,7 +78,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
     private List<String> nullFlag = new ArrayList<>();
     private boolean isRecheck = false;
     private List<String> unClickId = new ArrayList<>();
-    private List<String> index = new ArrayList<>();
+    private List<Integer> index = new ArrayList<>();
     private boolean isPositiveButton = false;
     private BarcodeManager barcodeManager;
     private Context mContext;
@@ -161,7 +162,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         tb_power.setOnCheckedChangeListener(this);
         tb_power.setClickable(false);
         et_detect_num = (EditText)view.findViewById(R.id.et_detect_num);
-        Utils.disableShowSoftInput(et_detect_num);
+//        Utils.disableShowSoftInput(et_detect_num);
 
         listView = (ListView) view.findViewById(R.id.detect_list_view);
         detectAdapter = new DetectListAdapter(list, getActivity());
@@ -221,7 +222,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         DetectItem item = list.get(position);
         if(index.size() > 0){  //当前检测项不为空，则只能指定当前检测项结果
-            if(index.contains(String.valueOf(item.getId())) && item.getType() == 2){ //当前检测的手动检测项可以选择结果
+            if(index.contains(item.getId()) && item.getType() == 2){ //当前检测的手动检测项可以选择结果
                 if(isRecheck){ //重检情况下
                     if(!unClickId.contains(String.valueOf(item.getId()))){ //如果当前项不在不能点击列表中，则可以修改结果
                         if (item.getResult().equals("合格")) {
@@ -255,7 +256,9 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        if(status == 1 && (list.get(list.size() -1).getResult().matches("不合格|无"))) {
+        String result = list.get(list.size() -1).getResult();
+        Logger.I("status: " + status + " ,result: " + result);
+        if(status == 1 && (result.matches("不合格|无"))) {
             recheckAlertDialogShow(position);
         }else{
             Toast.makeText(getActivity(), "检测未开始或未完成", Toast.LENGTH_SHORT).show();
@@ -359,6 +362,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         @Override
         public void messageArrived(String topic, MqttMessage message) throws Exception {
             String msgGBK = new String(message.getPayload(), "GBK");
+//            String msgGBK = new String(message.getPayload());
             Logger.I("messageArrived--- Topic: " + topic + " , message: " + msgGBK);
             if(Constant.TOPIC_SUBSCRIBE.equals(topic)){
                 String msg = msgGBK.toString();
@@ -409,14 +413,8 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
             case "e" :    //开始检测结果
                 updateStartAndStop(msg, 0);
                 break;
-            case "f" :    //暂停检测结果
-                updatePauseAndContinue(msg, 0);
-                break;
             case "g" :    //停止检测结果
                 updateStartAndStop(msg, 1);
-                break;
-            case "h" :    //继续检测结果
-                updatePauseAndContinue(msg, 1);
                 break;
             case "i" :    //PC发送的检测中自动检测项
                 highLightCurrentDetectItem(msg, 1);
@@ -436,9 +434,6 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
             case "n" :   //更新重新检测界面
                 updateRecheckUI(msg);
                 break;
-
-
-
             case "t" :    //查询检测结果
                 if(inquiryListener != null){
                     inquiryListener.handleMessage(msg);
@@ -551,7 +546,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         dialogDismiss();
         String content = msg.substring(1);
         Logger.D("收到主控机回复开始或停止的消息: " + content);
-        if(type == 0) {    //开始
+        if(type == 0) {    //开始检测
             if ("1".equals(content)) {
                 Toast.makeText(getActivity(), "主控机回复开始检测执行失败，请检查！", Toast.LENGTH_SHORT).show();
             } else {
@@ -559,7 +554,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
                 btn_startAndStop.setText("结束");
                 tb_power.setClickable(false); //开始检测后，不可关闭或打开电源
             }
-        }else{
+        }else{    //结束检测
             if ("1".equals(content)) {
                 Toast.makeText(getActivity(), "主控机回复停止检测执行失败，请检查！", Toast.LENGTH_SHORT).show();
             } else {
@@ -568,26 +563,6 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
                 tb_power.setClickable(true);  //停止检测后，可关闭或打开电源
                 print();
                 reset();
-            }
-        }
-    }
-    //更新暂停检测和继续检测状态
-    @Deprecated
-    private void updatePauseAndContinue(String msg, int type){
-        dialogDismiss();
-        String content = msg.substring(1);
-        Logger.D("收到主控机回复暂停或继续的消息: " + content);
-        if(type == 0) {    //暂停
-            if ("1".equals(content)) {
-                Toast.makeText(getActivity(), "主控机回复暂停检测执行失败，请检查！", Toast.LENGTH_SHORT).show();
-            } else {
-                status = 2;
-            }
-        }else{
-            if ("1".equals(content)) {
-                Toast.makeText(getActivity(), "主控机回复继续检测执行失败，请检查！", Toast.LENGTH_SHORT).show();
-            } else {
-                status = 1;
             }
         }
     }
@@ -600,8 +575,9 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         List<String> name = new ArrayList<>();
         String[] contentArr = content.split(",");
         for(int i=0; i<contentArr.length; i++){
+            Logger.I("detect item: " + contentArr[i]);
             if(i%2 == 0){     //偶数个
-                index.add(contentArr[i]);
+                index.add(praseToInt(contentArr[i]));
             }else{
                 name.add(contentArr[i]);
             }
@@ -609,16 +585,16 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         List<DetectItem> detectItems = new ArrayList<>();
         for(int i=0; i<index.size(); i++){
             DetectItem item = new DetectItem();
-            item.setId(Integer.parseInt(index.get(i)));
+            item.setId(index.get(i));
             item.setItem(name.get(i));
             detectItems.add(item);
         }
         insertItemIfNotExists(detectItems);
 
-        for(String str : index){
+        for(int inde : index){
             for(DetectItem detectItem : list){
-                if(Integer.parseInt(str) == detectItem.getId()){
-                    Logger.D("检测中的序号: " + str);
+                if(inde == detectItem.getId()){
+                    Logger.D("检测中的序号: " + inde);
                     if(type == 1) {
                         detectItem.setResult("自动检测...");
                     }else{
@@ -644,7 +620,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         //拿到检测项的编号在list中的位置
         int position =0;
         for(DetectItem item : list){
-            if(item.getId() == Integer.parseInt(index.get(0))){
+            if(item.getId() == index.get(0)){
                 position = list.indexOf(item);
                 break;
             }
@@ -742,7 +718,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         }
         for(int i=0; i<index.size(); i++){
             for(DetectItem datectItem : list){
-                if(Integer.parseInt(index.get(i)) == datectItem.getId()){
+                if(index.get(i) == datectItem.getId()){
                     Logger.D("结果中的序号: " + index.get(i));
                     String result = resultList.get(i);
                     String chinese = resultTransferToChinese(result.trim());
@@ -752,7 +728,9 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
             }
         }
         removeOKItem();
-        listView.setSelection(Integer.parseInt(index.get(0)));
+        if(index.size() > 0) {
+            listView.setSelection(index.get(0));
+        }
         index.clear();
     }
     //发送获取检测项目的消息
@@ -816,7 +794,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
     //发送重检或修改检测结果的消息, content "Y"表示"合格"...   type = 1 表示重检, type = 2 表示修改结果
     private void sendRecheckOrChangeResultMessage(int position, String content, int type){
         Logger.D("重检或修改检测结果的项目：" + position + " ,content = " + content + " , type = " + type);
-        String message = "";
+        String message;
         if(type == 1){
             message = "n" + position;
         }else{
@@ -1050,4 +1028,21 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         }
     };
 
+
+    /**
+     * string 转化为int
+     * @param str
+     * @return
+     */
+    private int praseToInt(String str){
+        int value = -1;
+        if(str != null && !"".equals(str)){
+            try{
+                value = Integer.parseInt(str);
+            }catch (Exception e){
+                Logger.W("praseToInt exception: " + str);
+            }
+        }
+        return  value;
+    }
 }
