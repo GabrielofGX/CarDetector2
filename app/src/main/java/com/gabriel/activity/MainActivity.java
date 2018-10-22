@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class MainActivity extends FragmentActivity {
     private ViewPager viewPager;
-    private ViewPagerAdapter viewPagerAapter;
+    private ViewPagerAdapter viewPagerAdapter;
     private long firstTime = 0;
 
     @Override
@@ -43,8 +43,8 @@ public class MainActivity extends FragmentActivity {
         fragments.add(DetectFragment.getInstance());
         fragments.add(new InquiryFragment());
 
-        viewPagerAapter = new ViewPagerAdapter(getSupportFragmentManager(), fragments);
-        viewPager.setAdapter(viewPagerAapter);
+        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), fragments);
+        viewPager.setAdapter(viewPagerAdapter);
         viewPager.setCurrentItem(0, true);
 
         DetectFragment.getInstance().setContext(this);

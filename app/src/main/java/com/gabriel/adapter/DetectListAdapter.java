@@ -46,7 +46,6 @@ public class DetectListAdapter extends BaseAdapter{
     @Override
     public View getView(final int position, View view, ViewGroup parent) {
         if (view == null) {
-            Logger.I("view == null ");
             viewHolder = new ViewHolder();
             mLayoutInflater = LayoutInflater.from(context);
             view = mLayoutInflater.inflate(R.layout.detect_list_item, null);

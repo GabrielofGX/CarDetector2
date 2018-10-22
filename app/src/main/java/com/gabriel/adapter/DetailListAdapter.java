@@ -46,7 +46,6 @@ public class DetailListAdapter extends BaseAdapter {
     public View getView(final int position, View view, ViewGroup parent) {
         Logger.I("detailAdapter position ==  " + position);
         if (view == null) {
-            Logger.I("detailAdapter view == null ");
             viewHolder = new ViewHolder();
             mLayoutInflater = LayoutInflater.from(context);
             view = mLayoutInflater.inflate(R.layout.detail_list_item, null);

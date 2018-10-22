@@ -9,14 +9,23 @@ android {
         minSdkVersion 16
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            applicationVariants.all{ variant->
+                variant.outputs.each { output->
+                    def oldFile = output.outputFile
+                    def releaseApkName = "CarDetector_V" + defaultConfig.versionName + ".apk"
+                    output.outputFile = new File(oldFile.parent, releaseApkName)
+                }
+            }
         }
     }
+
 }
 
 dependencies {
@@ -25,8 +34,5 @@ dependencies {
     compile 'com.android.support:support-v4:25.0.0'
     compile 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
     compile 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
-//    compile(name: 'library-release', ext: 'aar') {
-//        exclude group: 'com.android.support', module: 'appcompat-v7'
-//    }
     compile files('libs/Jb380_Common_V1.3.jar')
 }

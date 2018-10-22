@@ -31,8 +31,9 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     private boolean isConnected = false;
     private MQTTManager manager;
     ProgressDialog dialog;
-//    private String ip = "192.168.1.10";
-    private String ip = "iot.eclipse.org";
+    private String ip = "192.168.1.10";
+//    private String ip = "iot.eclipse.org";
+//    private String ip = "172.28.25.154";
     private String port = "1883";
     private int isShow = 0;
     @Override
@@ -43,6 +44,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         initView();
 
         connectToServer();//主动连接消息服务器
+
+        Logger.deleteLogFile(); //删除旧的日志文件
     }
 
     @Override
@@ -119,6 +122,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             @Override
             public void run() {
                 isConnected = manager.creatConnect(url, null, null, null);
+//                isConnected = manager.creatConnect(url, "admin", "admin1234", null);
                 Message msg = Message.obtain();
                 msg.what = 0;
                 msg.arg1 = isConnected ? 1 : 0;
@@ -195,11 +199,11 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 if (msg.startsWith("a")) {
                     messageArrived.what = 1;
                     messageArrived.obj = msg.substring(1);
-                    Logger.I("messageArrived--- obj: " + msg.substring(1));
+                    Logger.I("messageBody: " + msg.substring(1));
                 } else {
                     messageArrived.what = 2;
                     messageArrived.obj = msg;
-                    Logger.I("messageArrived--- obj: " + msg.substring(1));
+                    Logger.I("messageBody: " + msg.substring(1));
                 }
                 myHandler.sendMessage(messageArrived);
             }

@@ -17,9 +17,11 @@ import java.util.concurrent.TimeUnit;
  * Created by Administrator off 2017/5/10/010.
  */
 public class MQTTManager  {
-    private static String userName = "cardetecter";
-    private static String password = "123456";
-    private static String clientId = "phone1";
+//    private static String userName = "cardetector";
+//    private static String password = "123456";
+//    private static String userName = "admin";
+//    private static String password = "admin1234";
+    private static String clientId = "CarDetectorPhone";
     private MqttClient client;
     private MqttConnectOptions conOpt;
     private boolean clean = true;
@@ -53,7 +55,7 @@ public class MQTTManager  {
     /**
      * 创建Mqtt 连接
      *
-     * @param brokerUrl Mqtt服务器地址(tcp://xxxx:1863)
+     * @param brokerUrl Mqtt服务器地址(tcp://xxxx:1883)
      * @param userName  用户名
      * @param password  密码
      * @param clientId  clientId
@@ -72,13 +74,9 @@ public class MQTTManager  {
             conOpt.setCleanSession(clean);
             if (password != null) {
                 conOpt.setPassword(password.toCharArray());
-            }else{
-                conOpt.setPassword(MQTTManager.password.toCharArray());
             }
             if (userName != null) {
                 conOpt.setUserName(userName);
-            }else{
-                conOpt.setUserName(MQTTManager.userName);
             }
             if(clientId == null){
                 clientId = MQTTManager.clientId;
@@ -179,7 +177,7 @@ public class MQTTManager  {
                     }
                 }
             }
-        }, 0 * 1000, 10 * 1000, TimeUnit.MILLISECONDS);
+        }, 0, 10 * 1000, TimeUnit.MILLISECONDS);
     }
 
     /**
