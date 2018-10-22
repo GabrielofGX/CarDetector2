@@ -10,11 +10,11 @@ import android.content.IntentFilter;
 import android.jb.barcode.BarcodeManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +39,6 @@ import com.gabriel.manager.MQTTManager;
 import com.gabriel.util.Constant;
 import com.gabriel.util.DetectItem;
 import com.gabriel.util.Logger;
-import com.gabriel.util.Utils;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -212,7 +211,6 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         switch(buttonView.getId()){
             case R.id.tb_power :
-                Logger.D("onCheckedChanged: " + isChecked);
                 powerChange(isChecked);
                 break;
         }
@@ -271,11 +269,13 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
      * @param isChecked
      */
     private void powerChange(boolean isChecked){
+        Logger.D("powerChanged: " + isChecked + " ,isPowerMsg: " + isPowerMsg);
         if(!isPowerMsg){
             String message;
             if(isChecked){
                 //如果点击了取消，则直接返回
-                if(!powerOnDialog()) {
+                powerOnDialog();
+                if(!isPositiveButton) {
                     return;
                 }
                 message = "d1";   //发布电源打开的消息，消息内容是"d1"
@@ -284,7 +284,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
             }
             Logger.D("power on/off message: " + message);
             boolean result = manager.publish(Constant.TOPIC_PUBLISH, 0, message.getBytes());
-            Logger.I("发送电源开关的消息结果: " + result);
+            Logger.D("发送电源开关的消息结果: " + result);
         }else{
             isPowerMsg = false;
         }
@@ -293,7 +293,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
     /**
      * 打开电源开关的dialog
      */
-    private boolean powerOnDialog(){
+    private void powerOnDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         View view = View.inflate(getActivity(), R.layout.dialog_power_on, null);
         TextView tvCarType = (TextView) view.findViewById(R.id.dialog_power_on_carType);
@@ -306,19 +306,26 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 isPositiveButton = true;
+                myHandler.sendEmptyMessage(0);
             }
         });
         builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 isPositiveButton = false;
+                myHandler.sendEmptyMessage(0);
             }
         });
         AlertDialog dialog =  builder.create();
         dialog.show();
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextSize(28);
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextSize(28);
-        return isPositiveButton;
+
+        try{
+            Looper.loop(); //阻塞主线程，等待用户点击确定或取消
+        }catch (Exception e){
+
+        }
     }
     private void detectConfirm(){
         if(tb_power.isChecked()){
@@ -339,7 +346,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
             String message = "b" + carTypeContent + " ," + engineTypeTransfer(engineTypeContent) + " ," + carNum;
             Logger.D("detect confirm message: " + message);
             boolean result = manager.publish(Constant.TOPIC_PUBLISH, 0, message.getBytes());
-            Logger.I("发送车辆检测确认消息结果: " + result);
+            Logger.D("发送车辆检测确认消息结果: " + result);
         }
     }
     //结束检测成功后发送打印结果的命令
@@ -348,10 +355,9 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         String message = "PRINT";
         Logger.D("发送打印检测结果的消息: " + message);
         boolean result = manager.publish(Constant.TOPIC_PUBLISH, 0, message.getBytes());
-        Logger.I("发送打印检测结果的消息: " + result);
+        Logger.D("发送打印检测结果的消息: " + result);
     }
 
-    // 2017年5月23日21:07:17暂定，MainActivity中不做监听，DetectFragment 中监听
     class MyListener implements MqttCallback {
         @Override
         public void connectionLost(Throwable cause) {
@@ -383,7 +389,8 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         public void handleMessage(final Message msg) {
         switch (msg.what) {
             case 0:
-                break;
+                //打开电源时弹出AlertDialog，调用Looper.loop()阻塞主线程，点击确定或取消后发消息到Handler，抛出异常结束阻塞
+                throw new RuntimeException();
             case 1: //处理分发主控机回复的消息
                 handleMsg(msg.obj.toString());
                 break;
@@ -438,49 +445,49 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
                 if(inquiryListener != null){
                     inquiryListener.handleMessage(msg);
                 }else{
-                    Logger.I("inquiryListener is null");
+                    Logger.W("inquiryListener is null");
                 }
                 break;
             case "u" :    //查询所有项目详情
                 if(detailListener != null){
                     detailListener.handleMessage(msg);
                 }else{
-                    Logger.I("detailListener is null");
+                    Logger.W("查询所有项目详情: detailListener is null");
                 }
                 break;
             case "v" :    //查询排除(无)项目详情
                 if(detailListener != null){
                     detailListener.handleMessage(msg);
                 }else{
-                    Logger.I("detailListener is null");
+                    Logger.W("查询排除(无)项目详情: detailListener is null");
                 }
                 break;
             case "w" :    //查询合格项目详情
                 if(detailListener != null){
                     detailListener.handleMessage(msg);
                 }else{
-                    Logger.I("detailListener is null");
+                    Logger.W("查询合格项目详情: detailListener is null");
                 }
                 break;
             case "x" :    //查询不合格项目详情
                 if(detailListener != null){
                     detailListener.handleMessage(msg);
                 }else{
-                    Logger.I("detailListener is null");
+                    Logger.W("查询不合格项目详情: detailListener is null");
                 }
                 break;
             case "A" :    //查询已检项目详情
                 if(detailListener != null){
                     detailListener.handleMessage(msg);
                 }else{
-                    Logger.I("detailListener is null");
+                    Logger.W("查询已检项目详情: detailListener is null");
                 }
                 break;
             case "z" : //查询未检项目详情
                 if(detailListener != null){
                     detailListener.handleMessage(msg);
                 }else{
-                    Logger.I("detailListener is null");
+                    Logger.W("查询未检项目详情: detailListener is null");
                 }
                 break;
         }
@@ -489,7 +496,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
      * MQTT断开后重新连接
      */
     private void mqttReconnect(){
-        //TODO 重连
+        //TODO 未验证
         manager.startReconnect();
     }
     /**
@@ -497,7 +504,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
      */
     private void updateToggleButtonLine(String msg){
         String content = msg.substring(1);
-        Logger.D("b : " + content);
+        Logger.D("更新线束连接状态 : " + content);
         if("0".equals(content)){  //线束连接正确
             tb_power.setClickable(true);
             getDetectItem();
@@ -741,7 +748,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         String message = "c";
         Logger.D("获取检测项目的消息: " + message);
         boolean result = manager.publish(Constant.TOPIC_PUBLISH, 0, message.getBytes());
-        Logger.I("发送获取检测项目消息结果: " + result);
+        Logger.D("发送获取检测项目消息结果: " + result);
 
         list.clear();
     }
@@ -752,7 +759,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
                 String message = "m" + id + " " + resultTransferToChar(changeResult.get(id));
                 Logger.D("发送修改检测结果的消息: " + message);
                 boolean sendResult = manager.publish(Constant.TOPIC_PUBLISH, 0, message.getBytes());
-                Logger.I("发送修改检测结果的消息: " + sendResult);
+                Logger.D("发送修改检测结果的消息: " + sendResult);
                 if(sendResult){
                     nullFlag.add(String.valueOf(id));
                 }
@@ -786,7 +793,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         //手动检测项结果，消息内容为"l1 ,Y ,2 ,Y..."、"l1 ,N ,2 ,N..."、"l1 ,E ,2 ,E..."
         Logger.D("手动检测结果的消息: " + message);
         boolean sendResult = manager.publish(Constant.TOPIC_PUBLISH, 0, message.getBytes());
-        Logger.I("发送手动检测结果的消息: " + sendResult);
+        Logger.D("发送手动检测结果的消息: " + sendResult);
 
         dialogShow("等待主控机确认中...");
     }
@@ -802,7 +809,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         }
         Logger.D("发送重检或修改检测结果的消息: " + message);
         boolean sendResult = manager.publish(Constant.TOPIC_PUBLISH, 0, message.getBytes());
-        Logger.I("发送重检或修改检测结果的消息: " + sendResult);
+        Logger.D("发送重检或修改检测结果的消息: " + sendResult);
 
     }
     private void startAndStop(){
@@ -815,7 +822,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
                 String message = "e";
                 Logger.D("发送开始检测的消息: " + message);
                 boolean sendResult = manager.publish(Constant.TOPIC_PUBLISH, 0, message.getBytes());
-                Logger.I("发送开始检测的消息: " + sendResult);
+                Logger.D("发送开始检测的消息: " + sendResult);
             }
         }else if(settingLayout.getVisibility() == View.GONE){
             Toast.makeText(getActivity(), "请先点击右上角+进行配置", Toast.LENGTH_SHORT).show();
@@ -838,7 +845,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
                         String message = "g";
                         Logger.D("发送结束检测的消息: " + message);
                         boolean sendResult = manager.publish(Constant.TOPIC_PUBLISH, 0, message.getBytes());
-                        Logger.I("发送结束检测的消息: " + sendResult);
+                        Logger.D("发送结束检测的消息: " + sendResult);
                     }
                 })
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -999,7 +1006,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         @Override
         public void Barcode_Read(byte[] buffer, String codeId, int errorCode) {
             String result = new String(buffer);
-            Logger.I("detect result: " + result + " ,code: " + codeId + " ,i=" + errorCode);
+            Logger.I("barcode scan result: " + result + " ,code: " + codeId + " ,i=" + errorCode);
             barcodeManager.Barcode_Stop();
             et_detect_num.setText(result);
             et_detect_num.setSelection(et_detect_num.getText().toString().trim().length());
@@ -1014,7 +1021,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         public void onReceive(Context context, Intent intent) {
             if (intent.hasExtra("F4key")) {
                 if (intent.getStringExtra("F4key").equals("down")) {
-                    Logger.I("key down");
+                    Logger.D("key down");
                     if (null != barcodeManager) {
                         barcodeManager.Barcode_Stop();
                         if (null != barcodeManager) {
@@ -1022,7 +1029,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
                         }
                     }
                 } else if (intent.getStringExtra("F4key").equals("up")) {
-                    Logger.I("key up");
+                    Logger.D("key up");
                 }
             }
         }

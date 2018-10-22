@@ -17,10 +17,6 @@ import java.util.concurrent.TimeUnit;
  * Created by Administrator off 2017/5/10/010.
  */
 public class MQTTManager  {
-//    private static String userName = "cardetector";
-//    private static String password = "123456";
-//    private static String userName = "admin";
-//    private static String password = "admin1234";
     private static String clientId = "CarDetectorPhone";
     private MqttClient client;
     private MqttConnectOptions conOpt;
@@ -117,7 +113,7 @@ public class MQTTManager  {
     public boolean publish(String topicName, int qos, byte[] payload) {
         boolean flag = false;
         if (client != null && client.isConnected()) {
-            Logger.D("Publishing to topic \"" + topicName + "\" qos " + qos);
+            Logger.I("Publishing to topic \"" + topicName + "\" qos " + qos);
             // Create and configure a message
             MqttMessage message = new MqttMessage(payload);
             message.setQos(qos);
@@ -150,7 +146,7 @@ public class MQTTManager  {
             // For instance if QoS 1 is specified, any messages originally published at QoS 2 will
             // be downgraded to 1 when delivering to the client but messages published at 1 and 0
             // will be received at the same level they were published at.
-            Logger.D("Subscribing to topic \"" + topicName + "\" qos " + qos);
+            Logger.I("Subscribing to topic \"" + topicName + "\" qos " + qos);
             try {
                 client.subscribe(topicName, qos);
                 flag = true;

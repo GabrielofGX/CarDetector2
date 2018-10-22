@@ -61,9 +61,7 @@ public class InquiryListAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View view, ViewGroup parent) {
-        Logger.I("position ==  " + position);
         if (view == null) {
-            Logger.I("inquiry view == null ");
             viewHolder = new ViewHolder();
             mLayoutInflater = LayoutInflater.from(context);
             view = mLayoutInflater.inflate(R.layout.inquiry_list_item, null);

@@ -59,3 +59,6 @@
 -keep class org.eclipse.paho.**{*;}
 -keep class android.**{*;}
 -keep class android_serialport_api.**{*;}
+
+# 不混淆.so文件
+#-libraryjars ../XXX(此处为library名称)/src/main/jniLibs/armeabi/xxxxx.so
