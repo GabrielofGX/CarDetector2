@@ -79,6 +79,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
     private List<String> unClickId = new ArrayList<>();  //不可以点击的序号
     private List<Integer> index = new ArrayList<>();  //当前检测项的序号
     private boolean isPositiveButton = false;
+    private boolean isPrint = true; //是否打印结果，默认为true
     private BarcodeManager barcodeManager;
     private Context mContext;
 
@@ -569,7 +570,9 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
                 status = 0;
                 btn_startAndStop.setText("开始");
                 tb_power.setClickable(true);  //停止检测后，可关闭或打开电源
-                print();
+                if(isPrint) {
+                    print();
+                }
                 reset();
             }
         }
@@ -855,7 +858,13 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        dialogDismiss();
+                        isPrint = false;
+                        String message = "g";
+                        Logger.D("取消--发送结束检测的消息: " + message);
+                        boolean sendResult = manager.publish(Constant.TOPIC_PUBLISH, 2, message.getBytes());
+                        Logger.D("取消--发送结束检测的消息: " + sendResult);
+                        dialogShow("结束检测确认中...");
+//                        dialogDismiss();
                     }
                 });
         AlertDialog dialog =  builder.create();
@@ -915,6 +924,7 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         unClickId.clear();
         changeResult.clear();
         index.clear();
+        isPrint = true;
     }
 
 
