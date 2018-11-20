@@ -3,6 +3,7 @@ package com.gabriel.activity;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -21,6 +22,8 @@ import com.gabriel.util.Utils;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+
+import java.util.stream.Stream;
 
 /**
  * Created by Administrator off 2017/5/10/010.
@@ -91,7 +94,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             //发布关于登录话题的消息，消息内容是"a+account+password"
             String message = "a" + account + " ," + password;
             Logger.D("login message: " + message);
-            boolean result = manager.publish(Constant.TOPIC_PUBLISH, 0, message.getBytes());
+            boolean result = manager.publish(Constant.TOPIC_PUBLISH, 2, message.getBytes());
             Logger.I("发送登录消息结果: " + result);
         }
     }
@@ -102,7 +105,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         //发布获取汽车型号的消息，消息内容是"B"
         String message = "B";
         Logger.D("get carType message: " + message);
-        boolean result = manager.publish(Constant.TOPIC_PUBLISH, 0, message.getBytes());
+        boolean result = manager.publish(Constant.TOPIC_PUBLISH, 2, message.getBytes());
         Logger.I("发送获取汽车型号的消息结果: " + result);
     }
 
@@ -111,7 +114,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         //发布获取发动机型号的消息，消息内容是"C"
         String message = "C";
         Logger.D("get engineType message: " + message);
-        boolean result = manager.publish(Constant.TOPIC_PUBLISH, 0, message.getBytes());
+        boolean result = manager.publish(Constant.TOPIC_PUBLISH, 2, message.getBytes());
         Logger.I("发送获取发动机型号的消息结果: " + result);
     }
 
@@ -153,6 +156,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                 case 1:
                     if ("0".equals(msg.obj.toString())) {
                         Toast.makeText(LoginActivity.this, "身份验证成功!", Toast.LENGTH_SHORT).show();
+                        getCarType();
+                        getEngineType();
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         finish();
                     } else if ("1".equals(msg.obj.toString())) {
@@ -177,8 +182,19 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
     private void dealwithMessage(String message) {
         Logger.I("dealwithMessage: " + message);
+        SharedPreferences sp;
+        try {
+            sp = getSharedPreferences("carDetectorData", MODE_PRIVATE);
+        }catch (Exception e){
+            Logger.W("SharedPreferences Exception: " + e.getMessage());
+        }
         if (message.startsWith("B")) {
+//            Stream.of(message.substring(1).split(",")).filter(str -> i%2 == 0)
+//                    .
+        }else if(message.startsWith("C")){
 
+        }else{
+            Logger.W("unknown message!");
         }
     }
 
