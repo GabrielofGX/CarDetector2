@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.jb.barcode.BarcodeManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -45,6 +46,7 @@ import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -123,9 +125,17 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         settingLayout = (LinearLayout) view.findViewById(R.id.ll_setting);
 
         Spinner carType = (Spinner) view.findViewById(R.id.car_type);
-        final ArrayAdapter<CharSequence> carTypeAdapter = ArrayAdapter.createFromResource(
+        SharedPreferences sp = getActivity().getSharedPreferences("carDetectorData", getActivity().MODE_PRIVATE);
+        String[] carTypeArray = sp.getString("carType", "").split(",");
+        final ArrayAdapter<CharSequence> carTypeAdapter;
+        if(carTypeArray.length > 0) {
+           carTypeAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, carTypeArray);
+        }else {
+            //从资源文件中读取配置的车型
+           carTypeAdapter = ArrayAdapter.createFromResource(
                 getActivity(), R.array.carType,
                 android.R.layout.simple_spinner_dropdown_item);
+        }
         carType.setAdapter(carTypeAdapter);
         carType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -140,9 +150,15 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
             }
         });
         Spinner engineType = (Spinner) view.findViewById(R.id.engine_type);
-        final ArrayAdapter<CharSequence> engineTypeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.engineType,
-                android.R.layout.simple_spinner_dropdown_item);
+        String[] engineTypeArray = sp.getString("engineType", "").split(",");
+        final ArrayAdapter<CharSequence> engineTypeAdapter;
+        if(engineTypeArray.length > 0){
+            engineTypeAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, engineTypeArray);
+        }else {
+            engineTypeAdapter = ArrayAdapter.createFromResource(
+                    getActivity(), R.array.engineType,
+                    android.R.layout.simple_spinner_dropdown_item);
+        }
         engineType.setAdapter(engineTypeAdapter);
         engineType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -959,25 +975,19 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
     }
     //发动机型号转为编号
     private String engineTypeTransfer(String str){
-        switch(str){
-            case "欧Ⅱ" :
-                return "0";
-            case "欧Ⅲ" :
-                return "1";
-            case "国Ⅲ" :
-                return "2";
-            case "国Ⅳ" :
-                return "3";
-            case "国Ⅴ" :
-                return "4";
-            case "LNG" :
-                return "5";
-            case "WP13" :
-                return "6";
-            case "风冷" :
-                return "7";
-            default :
+        SharedPreferences sp = getActivity().getSharedPreferences("carDetectorData", getActivity().MODE_PRIVATE);
+        List<String> engineTypeList = Arrays.asList(sp.getString("engineType", "").split(","));
+        if(engineTypeList.contains(str)){
+            return String.valueOf(engineTypeList.indexOf(str));
+        }else if(engineTypeList.size() == 0){
+            engineTypeList =  Arrays.asList(getResources().getStringArray(R.array.engineType));
+            if(engineTypeList.contains(str)){
+                return String.valueOf(engineTypeList.indexOf(str));
+            }else{
                 return "未知结果";
+            }
+        }else{
+            return "未知结果";
         }
     }
 

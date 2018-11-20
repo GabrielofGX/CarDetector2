@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -23,6 +24,11 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -34,9 +40,9 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     private boolean isConnected = false;
     private MQTTManager manager;
     ProgressDialog dialog;
-    private String ip = "192.168.1.10";
+//    private String ip = "192.168.1.10";
 //    private String ip = "iot.eclipse.org";
-//    private String ip = "172.28.25.154";
+    private String ip = "172.28.25.154";
     private String port = "1883";
     private int isShow = 0;
     @Override
@@ -124,8 +130,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                isConnected = manager.creatConnect(url, null, null, null);
-//                isConnected = manager.creatConnect(url, "admin", "admin1234", null);
+//                isConnected = manager.creatConnect(url, null, null, null);
+                isConnected = manager.creatConnect(url, "admin", "admin1234", null);
                 Message msg = Message.obtain();
                 msg.what = 0;
                 msg.arg1 = isConnected ? 1 : 0;
@@ -182,17 +188,42 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
     private void dealwithMessage(String message) {
         Logger.I("dealwithMessage: " + message);
-        SharedPreferences sp;
+        SharedPreferences sp = null;
         try {
             sp = getSharedPreferences("carDetectorData", MODE_PRIVATE);
         }catch (Exception e){
             Logger.W("SharedPreferences Exception: " + e.getMessage());
         }
         if (message.startsWith("B")) {
-//            Stream.of(message.substring(1).split(",")).filter(str -> i%2 == 0)
-//                    .
+            String[] carType = message.substring(1).split(",");
+            //java8支持
+//            List<String> carTypeList = IntStream.range(0, carType.length).filter(i -> i %2 == 1)
+//                    .mapToObj(i -> carType[i])
+//                    .collect(Collectors.toList());
+            List<String> carTypeList = new ArrayList<>();
+            for(int i=0; i<carType.length; i++){
+                if(i%2 == 1){
+                    carTypeList.add(carType[i]);
+                }
+            }
+            if(sp != null) {
+                sp.edit().putString("carType", TextUtils.join(",", carTypeList)).commit();
+            }
         }else if(message.startsWith("C")){
-
+            String[] engineType = message.substring(1).split(",");
+            //java8支持
+//            List<String> engineTypeList = IntStream.range(0, engineType.length).filter(i -> i %2 == 1)
+//                    .mapToObj(i -> engineType[i])
+//                    .collect(Collectors.toList());
+            List<String> engineTypeList = new ArrayList<>();
+            for(int i=0; i<engineType.length; i++){
+                if(i%2 == 1){
+                    engineTypeList.add(engineType[i]);
+                }
+            }
+            if(sp != null) {
+                sp.edit().putString("engineType", TextUtils.join(",", engineTypeList)).commit();
+            }
         }else{
             Logger.W("unknown message!");
         }
