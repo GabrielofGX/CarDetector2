@@ -127,15 +127,15 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         Spinner carType = (Spinner) view.findViewById(R.id.car_type);
         SharedPreferences sp = getActivity().getSharedPreferences("carDetectorData", getActivity().MODE_PRIVATE);
         String[] carTypeArray = sp.getString("carType", "").split(",");
-        final ArrayAdapter<CharSequence> carTypeAdapter;
-        if(carTypeArray.length > 0) {
+        final ArrayAdapter<String> carTypeAdapter;
+//        if(carTypeArray.length > 0) {
            carTypeAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, carTypeArray);
-        }else {
-            //从资源文件中读取配置的车型
-           carTypeAdapter = ArrayAdapter.createFromResource(
-                getActivity(), R.array.carType,
-                android.R.layout.simple_spinner_dropdown_item);
-        }
+//        }else {
+//            //从资源文件中读取配置的车型
+//           carTypeAdapter = ArrayAdapter.createFromResource(
+//                getActivity(), R.array.carType,
+//                android.R.layout.simple_spinner_dropdown_item);
+//        }
         carType.setAdapter(carTypeAdapter);
         carType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -151,14 +151,14 @@ public class DetectFragment extends Fragment implements View.OnClickListener, Co
         });
         Spinner engineType = (Spinner) view.findViewById(R.id.engine_type);
         String[] engineTypeArray = sp.getString("engineType", "").split(",");
-        final ArrayAdapter<CharSequence> engineTypeAdapter;
-        if(engineTypeArray.length > 0){
+        final ArrayAdapter<String> engineTypeAdapter;
+//        if(engineTypeArray.length > 0){
             engineTypeAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item, engineTypeArray);
-        }else {
-            engineTypeAdapter = ArrayAdapter.createFromResource(
-                    getActivity(), R.array.engineType,
-                    android.R.layout.simple_spinner_dropdown_item);
-        }
+//        }else {
+//            engineTypeAdapter = ArrayAdapter.createFromResource(
+//                    getActivity(), R.array.engineType,
+//                    android.R.layout.simple_spinner_dropdown_item);
+//        }
         engineType.setAdapter(engineTypeAdapter);
         engineType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

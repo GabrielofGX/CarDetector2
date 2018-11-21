@@ -27,6 +27,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -40,11 +42,15 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     private boolean isConnected = false;
     private MQTTManager manager;
     ProgressDialog dialog;
-//    private String ip = "192.168.1.10";
+    private String ip = "192.168.1.10";
 //    private String ip = "iot.eclipse.org";
-    private String ip = "172.28.25.154";
+//    private String ip = "172.28.25.154";
     private String port = "1883";
     private int isShow = 0;
+    private Timer timer = new Timer();
+    private boolean carTypeExists = false;
+    private boolean engineTypeExists = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -130,8 +136,8 @@ public class LoginActivity extends Activity implements View.OnClickListener {
         new Thread(new Runnable() {
             @Override
             public void run() {
-//                isConnected = manager.creatConnect(url, null, null, null);
-                isConnected = manager.creatConnect(url, "admin", "admin1234", null);
+                isConnected = manager.creatConnect(url, null, null, null);
+//                isConnected = manager.creatConnect(url, "admin", "admin1234", null);
                 Message msg = Message.obtain();
                 msg.what = 0;
                 msg.arg1 = isConnected ? 1 : 0;
@@ -145,7 +151,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             switch (msg.what) {
                 case 0:
                     dialogDismiss();
-                    manager.subscribe(Constant.TOPIC_SUBSCRIBE, 0);
+                    manager.subscribe(Constant.TOPIC_SUBSCRIBE, 2);
                     manager.getClient().setCallback(new MyListener());
                     runOnUiThread(new Runnable() {
                         @Override
@@ -164,18 +170,20 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                         Toast.makeText(LoginActivity.this, "身份验证成功!", Toast.LENGTH_SHORT).show();
                         getCarType();
                         getEngineType();
-                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                        finish();
+                        timer.schedule(timerTask, 0, 100);
                     } else if ("1".equals(msg.obj.toString())) {
+                        dialogDismiss();
                         Toast.makeText(LoginActivity.this, "账号不存在!", Toast.LENGTH_SHORT).show();
                     } else if ("2".equals(msg.obj.toString())) {
+                        dialogDismiss();
                         Toast.makeText(LoginActivity.this, "密码错误!", Toast.LENGTH_SHORT).show();
                     } else if ("3".equals(msg.obj.toString())) {
+                        dialogDismiss();
                         Toast.makeText(LoginActivity.this, "主控机未准备好，请稍候!", Toast.LENGTH_SHORT).show();
                     } else {
+                        dialogDismiss();
                         Toast.makeText(LoginActivity.this, "主控机应答错误，未知异常!", Toast.LENGTH_SHORT).show();
                     }
-                    dialogDismiss();
                     break;
                 case 2:
                     dealwithMessage(msg.obj.toString());
@@ -208,6 +216,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             }
             if(sp != null) {
                 sp.edit().putString("carType", TextUtils.join(",", carTypeList)).commit();
+                carTypeExists = true;
             }
         }else if(message.startsWith("C")){
             String[] engineType = message.substring(1).split(",");
@@ -223,6 +232,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
             }
             if(sp != null) {
                 sp.edit().putString("engineType", TextUtils.join(",", engineTypeList)).commit();
+                engineTypeExists = true;
             }
         }else{
             Logger.W("unknown message!");
@@ -261,6 +271,21 @@ public class LoginActivity extends Activity implements View.OnClickListener {
 
         }
     }
+
+    /**
+     * 定时器，PC回复账号登录成功后启动，每100ms检测一次是否存在carType和engineType，都存在则页面跳转
+     */
+    TimerTask timerTask = new TimerTask() {
+        @Override
+        public void run() {
+            if(carTypeExists && engineTypeExists){
+                dialogDismiss();
+                timer.cancel();
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                finish();
+            }
+        }
+    };
 
     private void initView() {
         et_account = (EditText) findViewById(R.id.et_account);
